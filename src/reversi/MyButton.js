@@ -17,7 +17,6 @@ const MyButton = props => {
   })
 
   const clickFunc = () => {
-    console.log("button click!")
     setFunc(val + 1)
   }
 

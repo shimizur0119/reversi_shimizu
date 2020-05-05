@@ -2,7 +2,6 @@ import React from "react"
 import { css } from "glamor"
 
 const EndMessage = props => {
-  console.log("render EndMessage")
   const count = props.count
 
   const anime = css.keyframes({

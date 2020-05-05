@@ -33,7 +33,6 @@ export const reversFunc = (myturn, directionMap, displayMap, data) => {
 }
 
 const Cell = props => {
-  // console.log("render-cell")
   const displayMap = props.displayMap
   const data = props.data
   const myturn = props.myturn
@@ -53,10 +52,10 @@ const Cell = props => {
 
 
   const clickFunc = () => {
-    console.log("click")
     if (!data.next) return
     const arr = reversFunc(myturn, directionMap, displayMap, data)
     props.setDisplayMap(arr)
+    props.setSkipFlag(0)
     props.setMyturn(!myturn)
   }
 

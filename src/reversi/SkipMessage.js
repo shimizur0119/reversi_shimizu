@@ -1,8 +1,8 @@
 import React from "react"
 import { css } from "glamor"
 
-const SkipMessage = () => {
-  console.log("render SkipMessage")
+const SkipMessage = props => {
+  const inFlag = props.inFlag
 
   const anime = css.keyframes({
     '0%': { transform: 'scale(0.1)', opacity: 0, visibility: "visible" },
@@ -12,8 +12,14 @@ const SkipMessage = () => {
     '100%': { transform: 'scale(0.1)', opacity: 0, visibility: "visible" },
   })
 
+  const animation = inFlag ? css({
+    animation: `${anime} 2s`
+  }) : null
+
+
   const tmp_style = css({
-    animation: `${anime} 2s`,
+    // ".hi &": { animation: `${anime} 2s` },
+    // animation: `${anime} 2s`,
     height: "20%",
     width: "60%",
     backgroundColor: "rgb(128,128,128,0.9)",
@@ -32,7 +38,7 @@ const SkipMessage = () => {
   })
 
   return (
-    <div {...tmp_style}>
+    <div {...tmp_style} {...animation}>
       <span {...txt_style}>SKIP</span>
     </div>
   )

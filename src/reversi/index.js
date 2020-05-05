@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import { css } from "glamor"
 
 import Layout from "./Layout"
@@ -88,8 +88,6 @@ const getCount = displayMap => {
 }
 
 const Reversi = props => {
-  console.log("render-Reversi")
-  const initRef = useRef()
   const width = CN
   const borderSize = props.size / width / 100 * 5
   const size = props.size - (borderSize * 2)
@@ -97,25 +95,18 @@ const Reversi = props => {
   const cellMap = cellMapFunc(width)
   const [displayMap, setDisplayMap] = useState(cellMap)
   const [myturn, setMyturn] = useState(true)
-  const [skipFlag, setSkipFlag] = useState("")
+  const [skipFlag, setSkipFlag] = useState(0)
   const [count, setCount] = useState({ P: 2, E: 2 })
   const [end, setEnd] = useState(false)
   const [restart, setRestart] = useState(0)
 
   useEffect(() => {
-    console.log("initRef")
-  }, [initRef])
-
-  useEffect(() => {
-    console.log("useEfect myturn")
     const nextMap = getAddNextMap(displayMap, myturn)
     setDisplayMap(nextMap)
     const count = getCount(nextMap)
     setCount(count)
     let flag = nextMap.findIndex(e => e.next === true) === -1
-    let flagTxt = myturn ? "P" : "E"
-    if (flag) setSkipFlag(skipFlag + flagTxt)
-
+    if (flag) setSkipFlag(skipFlag + 1)
     if (!myturn && !flag) {
       let acts = nextMap.filter(e => e.next === true)
       let actData = acts[0]
@@ -128,9 +119,12 @@ const Reversi = props => {
   }, [myturn, restart])
 
   useEffect(() => {
-    console.log("useEffect skip")
-    if (skipFlag === "") return
-    if ((count.P === 0 || count.E === 0) || count.P + count.E === CN ** 2) {
+    if (!skipFlag) return
+    if (
+      (count.P === 0 || count.E === 0) ||
+      ((count.P + count.E) === CN ** 2) ||
+      skipFlag >= 2
+    ) {
       setEnd(true)
       return
     }
@@ -140,16 +134,10 @@ const Reversi = props => {
   }, [skipFlag])
 
   useEffect(() => {
-    if (!end) return
-    console.log("game set!!")
-  }, [end])
-
-  useEffect(() => {
     if (restart === 0) return
-    console.log("useEffect restart")
     setDisplayMap(cellMap)
     setMyturn(true)
-    setSkipFlag("")
+    setSkipFlag(0)
     setCount({ P: 2, E: 2 })
     setEnd(false)
     setRestart(0)
@@ -170,6 +158,7 @@ const Reversi = props => {
         setMyturn={setMyturn}
         displayMap={displayMap}
         setDisplayMap={setDisplayMap}
+        setSkipFlag={setSkipFlag}
       />)
     Cells.push(item)
   }
@@ -190,7 +179,7 @@ const Reversi = props => {
         <CountBox side="E" count={count.E} borderSize={borderSize} />
       </div>
       <Layout size={size} borderSize={borderSize}>
-        {skipFlag && !end && <SkipMessage skipFlag={skipFlag} />}
+        {!end && <SkipMessage inFlag={skipFlag} />}
         {end && <EndMessage count={count} />}
         {Cells}
       </Layout>
