@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react"
 import { css } from "glamor"
 
 import Layout from "./Layout"
-import Cell from "./Cell"
+import Cell, { reversFunc } from "./Cell"
 import SkipMessage from "./SkipMessage"
 import EndMessage from "./EndMessage"
 import CountBox from "./CountBox"
+import MyButton from "./MyButton"
 import { directionMap, CN } from "./lib/lib"
 
 const cellMapFunc = width => {
@@ -99,6 +100,7 @@ const Reversi = props => {
   const [skipFlag, setSkipFlag] = useState("")
   const [count, setCount] = useState({ P: 2, E: 2 })
   const [end, setEnd] = useState(false)
+  const [restart, setRestart] = useState(0)
 
   useEffect(() => {
     console.log("initRef")
@@ -113,9 +115,17 @@ const Reversi = props => {
     let flag = nextMap.findIndex(e => e.next === true) === -1
     let flagTxt = myturn ? "P" : "E"
     if (flag) setSkipFlag(skipFlag + flagTxt)
+
+    if (!myturn && !flag) {
+      let acts = nextMap.filter(e => e.next === true)
+      let actData = acts[0]
+      const newMap = reversFunc(myturn, directionMap, nextMap, actData)
+      setDisplayMap(newMap)
+      setMyturn(true)
+    }
     // ↓lintを部分的に無効にするコメント
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myturn])
+  }, [myturn, restart])
 
   useEffect(() => {
     console.log("useEffect skip")
@@ -133,6 +143,19 @@ const Reversi = props => {
     if (!end) return
     console.log("game set!!")
   }, [end])
+
+  useEffect(() => {
+    if (restart === 0) return
+    console.log("useEffect restart")
+    setDisplayMap(cellMap)
+    setMyturn(true)
+    setSkipFlag("")
+    setCount({ P: 2, E: 2 })
+    setEnd(false)
+    setRestart(0)
+    // ↓lintを部分的に無効にするコメント
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restart])
 
   let Cells = []
   for (const [i, p] of displayMap.entries()) {
@@ -152,25 +175,28 @@ const Reversi = props => {
   }
 
   const container = css({
-    display: "inline-block"
+    display: "inline-block",
   })
 
   const countBoxContainer = css({
-    textAlign: "center"
+    textAlign: "center",
   })
 
 
   return (
     <div {...container}>
       <div {...countBoxContainer}>
-        <CountBox side="P" count={count.P} />
-        <CountBox side="E" count={count.E} />
+        <CountBox side="P" count={count.P} borderSize={borderSize} />
+        <CountBox side="E" count={count.E} borderSize={borderSize} />
       </div>
       <Layout size={size} borderSize={borderSize}>
         {skipFlag && !end && <SkipMessage skipFlag={skipFlag} />}
         {end && <EndMessage count={count} />}
         {Cells}
       </Layout>
+      <div {...countBoxContainer}>
+        <MyButton borderSize={borderSize} func={setRestart} val={restart} />
+      </div>
     </div>
   )
 }
